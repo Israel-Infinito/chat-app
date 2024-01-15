@@ -1,0 +1,47 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    font-size: 1.5em;
+}
+
+h2 {
+    font-size: 1.2em;
+}
+
+h3 {
+    font-size: 1em;
+}
+
+h4 {
+    font-size: 0.8em;
+}
+
+h5 {
+    font-size: 0.6em;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    margin: 0 auto;
+}
+
+.title{
+    text-align: center;
+}
+
+form {
+    margin-top: 20px;
+}
+
+input[type=text], input[type=password] {
+    margin-top: 10px;
+    width: 100%;
+}
+
+input[type=submit] {
+    margin-top: 10px;
+}
