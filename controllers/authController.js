@@ -28,7 +28,6 @@ exports.logout = (req, res) => {
 
 // User registration implementation
 exports.register = async (req, res) => {
-    console.log('Registering user:', req.body);
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
       const user = await User.create({ username: req.body.username, password: hashedPassword });

@@ -14,7 +14,7 @@ const session = require('express-session');
 const flash = require('connect-flash');
 
 
-
+// Connection to MongoDB database
 db.connect();
 
 // Default route to test if the server is running
@@ -22,20 +22,27 @@ app.get('/', (req, res) => {
     res.send('');
 });
 
+// express.static middleware to serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Body parser middleware to parse request body
 app.use(bodyParser.json());
 
+// express-session middleware to manage sessions
 app.use(session({
     secret: 's3Cur3$eSs10nK3Y',
     resave: false,
     saveUninitialized: true,
 }));
 
+// Connect-flash middleware to display messages set by other middleware
 app.use(flash());
 
-// Passport setup
+// Passport middleware for authentication
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Middleware to set local variables for use in all views
 app.use('/', authRoutes);
 app.use('/', chatRoutes);
 
@@ -61,10 +68,14 @@ passport.use(new LocalStrategy(
     }
 ));
 
+
+// Passport authentication strategy for registering users
 passport.serializeUser(function (user, done) {
     done(null, user.id);
 });
 
+
+// Passport authentication strategy for retrieving user from session
 passport.deserializeUser(async function (id, done) {
     try {
         const user = await User.findById(id);

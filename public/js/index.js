@@ -1,6 +1,5 @@
 $(() => {
     const username = localStorage.getItem('username');
-    console.log(username);
     const socket = io('http://localhost:3000', {
         query: {
             username: username
@@ -11,7 +10,6 @@ $(() => {
     // Using an event listener for the form submission
     $('#send-message').click((event) => {
         event.preventDefault();
-        console.log('Message sent');
         const message = username + ': ' + $('#message').val();
         const content = $('#message').val();
         fetch('/messages', {
@@ -23,7 +21,6 @@ $(() => {
         })
             .then(response => response.json())
             .then(data => {
-                console.log(data);
             });
         socket.emit('chat message', message);
         $('#message').val('');
@@ -31,10 +28,10 @@ $(() => {
 
     // Using an event listener for receiving chat messages
     socket.on('chat message', (message) => {
-        console.log('Message received:', message);
         // Extract username and message text from the received message
         const username = message.split(': ')[0];
         const text = message.split(': ')[1];
+        
 
         // Check if the message is from the current user
         const isCurrentUser = username === localStorage.getItem('username');
@@ -47,8 +44,8 @@ $(() => {
         // Create the message header
         const messageHeader = $(`
             <div class="message-header">
-            <span class="username">${isCurrentUser ? 'You' : username}</span>
-            <span class="timestamp">${formatTimestamp(new Date(message.timestamp))}</span>
+            <span class="username">${isCurrentUser ? 'Me' : username}</span>
+            <span class="timestamp">${formatTimestamp(new Date)}</span>
             </div>
         `);
 
@@ -91,7 +88,6 @@ $(document).ready(() => {
     fetch('/messages')
         .then(response => response.json())
         .then(data => {
-            console.log(data);
             if (data.status === 'success') {
                 data.messages.forEach(message => {
                     const username = message.username;
