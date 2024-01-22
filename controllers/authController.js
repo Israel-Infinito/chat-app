@@ -28,12 +28,18 @@ exports.logout = (req, res) => {
 
 // User registration implementation
 exports.register = async (req, res) => {
-    try {
+  try {
+      const existingUser = await User.findOne({ username: req.body.username });
+
+      if (existingUser) {
+          return res.status(400).json({ status: 'error', message: 'Username already exists' });
+      }
+
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
       const user = await User.create({ username: req.body.username, password: hashedPassword });
       res.status(201).json({ status: 'success' , user: user.username});
     } catch (error) {
       console.error(error)
       res.status(500).json({ status: 'error', message: 'Failed to create user' });
-    }
-  };
+  }
+};

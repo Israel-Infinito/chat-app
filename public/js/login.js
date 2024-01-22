@@ -20,7 +20,7 @@ document.getElementById('loginForm').addEventListener('submit', (event) => {
                 // Storing the username in local storage for use in the chat
                 localStorage.setItem('username', data.user);
                 // Displaying the alert message in modal and redirecting user to the home page after closing modal
-                showAlertMessage('Login successful!', function() {
+                showAlertMessage('Login successful!', function () {
                     window.location.href = '/chat';
                 }, false, 1000);
             } else {
@@ -52,13 +52,19 @@ document.getElementById('registerBtn').addEventListener('click', (event) => {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-               // Displaying the success message using the alert modal
-                showAlertMessage('Registration successful! You can proceed to login.', function() {
-                
+                // Displaying the success message using the alert modal
+                showAlertMessage('Registration successful! You can proceed to login.', function () {
+
                 }, true);
             } else {
-                // Displaying the error message using the alert modal
-                showErrorAlert(data.message);
+                // To check if the error message is "Username already exists"
+                if (data.message === 'Username already exists') {
+                    // Display a specific error message for this case
+                    showErrorAlert('The username you entered is already taken. Please choose a different username.');
+                } else {
+                    // Displaying the error message using the alert modal
+                    showErrorAlert(data.message);
+                }
             }
         })
         .catch((error) => {
@@ -82,7 +88,7 @@ function showAlertMessage(message, callback, showCloseButton = true, delay = 0) 
 
     // If there's a delay, the callback is called after the delay
     if (delay > 0) {
-        setTimeout(function() {
+        setTimeout(function () {
             hideCustomAlert();
         }, delay);
     }
@@ -93,7 +99,7 @@ function showErrorAlert(message) {
     const customAlert = document.getElementById('customAlert');
     customAlert.getElementsByTagName('p')[0].innerText = message;
     customAlert.style.display = 'block';
-    customAlert.style.backgroundColor = '#dc3545'; 
+    customAlert.style.backgroundColor = '#dc3545';
     document.getElementById('overlay').style.display = 'block';
     document.getElementById('closeButton').style.display = 'block';
 }

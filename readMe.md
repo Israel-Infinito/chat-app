@@ -58,24 +58,23 @@ Make sure you have the following installed:
 - `server.js`: This file is responsible for starting the server and handling top-level server errors.
 - `package.json`: This file holds various metadata relevant to the project including package dependencies.
 - `controllers`: This directory contains files that define the app routes' behavior. 
-  - `authController.js`: Handles authentication-related requests such as login and register.
+  - `authController.js`: Handles authentication-related requests for login and register.
   - `chatController.js`: Handles chat-related requests.
 - `models`: This directory contains definitions of the data structures used by the application.
   - `userModel.js`: Defines the structure of a user in the application.
-  - `chatModel.js`: Defines the structure of a chat message in the application.
+  - `messageModel.js`: Defines the structure of a chat message in the application.
 - `routes`: This directory contains files that define the app routes.
   - `authRoutes.js`: Defines routes related to authentication.
   - `chatRoutes.js`: Defines routes related to chat.
 - `public`: This directory contains static files served by the server.
   - `html`: Contains HTML files.
     - `login.html`: This renders the login page.
-    - `chat.html`: This renders the chat page.
+    - `index.html`: This renders the chat page.
   - `js`: Contains client-side JavaScript files.
-    - `login.js`: Handles the behavior of the login page.
-    - `register.js`: Handles the behavior of the registration page.
-    - `chat.js`: Handles the behavior of the chat page.
+    - `login.js`: Handles the behavior of the login page including the login authentication and registration.
+    - `index.js`: Handles the behavior of the chat page.
   - `css`: Contains CSS files.
-    - `style.css`: Defines the styles for the application.
+    - `styles.css`: Defines the styles for the application.
 - `config`: This directory contains configuration files for the app.
   - `db.js`: Configures the connection to the database.
 
