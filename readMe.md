@@ -94,8 +94,8 @@ Make sure you have the following installed:
 
 ## Project Video Resources
 
-https://www.youtube.com/watch?v=O5kh3sTVSvA (LOGIN AND REGISTER)
-https://www.youtube.com/watch?v=bhiEJW5poHU (MONGODB AND MONGOOSE)
-https://www.youtube.com/watch?v=kOJEWNPYBUo (CHAT APP)
-https://www.youtube.com/watch?v=ACUXjXtG8J4 (MONGODB CONNECTION)
+- https://www.youtube.com/watch?v=O5kh3sTVSvA (LOGIN AND REGISTER)
+- https://www.youtube.com/watch?v=bhiEJW5poHU (MONGODB AND MONGOOSE)
+- https://www.youtube.com/watch?v=kOJEWNPYBUo (CHAT APP)
+- https://www.youtube.com/watch?v=ACUXjXtG8J4 (MONGODB CONNECTION)
 
