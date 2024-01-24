@@ -2,8 +2,9 @@ const passport = require('passport');
 const bcrypt = require('bcrypt');
 const User = require('../models/userModel'); 
 
-// User login implementation
-exports.login = (req, res, next) => {
+class AuthController {
+  // User login implementation
+  static login(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
       if (err) { 
         return res.status(500).json({ message: 'An error occurred during authentication.' }); 
@@ -18,21 +19,21 @@ exports.login = (req, res, next) => {
         return res.status(200).json({ status: 'success', user: req.user.username });
       });
     })(req, res, next);
-  };
+  }
 
-// Logout implementation
-exports.logout = (req, res) => {
-  req.logout();
-  res.redirect('/login');
-};
+  // Logout implementation
+  static logout(req, res) {
+    req.logout();
+    res.redirect('/login');
+  }
 
-// User registration implementation
-exports.register = async (req, res) => {
-  try {
+  // User registration implementation
+  static async register(req, res) {
+    try {
       const existingUser = await User.findOne({ username: req.body.username });
 
       if (existingUser) {
-          return res.status(400).json({ status: 'error', message: 'Username already exists' });
+        return res.status(400).json({ status: 'error', message: 'Username already exists' });
       }
 
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -41,5 +42,8 @@ exports.register = async (req, res) => {
     } catch (error) {
       console.error(error)
       res.status(500).json({ status: 'error', message: 'Failed to create user' });
+    }
   }
-};
+}
+
+module.exports = AuthController;

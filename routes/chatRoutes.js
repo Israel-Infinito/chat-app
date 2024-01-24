@@ -2,16 +2,23 @@ const express = require('express');
 const path = require('path');
 const chatController = require('../controllers/chatController');
 const { ensureAuthenticated } = require('../middleware/auth');
-const router = express.Router();
 
-// route to get chat page
-router.get('/chat', ensureAuthenticated, function(req, res) { 
-    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
-});
+class ChatRoutes {
+    constructor() {
+        this.router = express.Router();
+        this.configureRoutes();
+    }
 
-// route to post message
-router.post('/messages', chatController.postMessage);
+    // Routes for the chat page
+    configureRoutes() {
+        this.router.get('/chat', ensureAuthenticated, this.getChatPage);
+        this.router.post('/messages', chatController.postMessage);
+        this.router.get('/messages', chatController.getMessages);
+    }
 
-// route to get messages
-router.get('/messages', chatController.getMessages);
-module.exports = router;
+    getChatPage(req, res) {
+        res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+    }
+}
+
+module.exports = new ChatRoutes().router;

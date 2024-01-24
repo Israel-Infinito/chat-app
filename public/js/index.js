@@ -1,160 +1,189 @@
-$(() => {
-    const username = localStorage.getItem('username');
-    const socket = io('http://localhost:3000', {
-        query: {
-            username: username
-        }
-    });
+class ChatApp {
+    constructor() {
+        // Constructs a new instance of the ChatApp class
+        this.username = localStorage.getItem('username');
+        this.socket = io('http://localhost:3000', {
+            query: {
+                username: this.username
+            }
+        });
+        this.messageInput = $('#message');
+        this.mainChat = $('.main-chat');
+        this.signOutButton = document.querySelector('.sign-out');
+        this.modal = document.getElementById('customAlert');
+        this.overlay = document.getElementById('overlay');
 
+        this.init();
+    }
 
-    // Using an event listener for the form submission
-    $('#send-message').click((event) => {
-        event.preventDefault();
-        const message = username + ': ' + $('#message').val();
-        const content = $('#message').val();
+    init() {
+        // Initializes the ChatApp instance by setting up event listeners and fetching messages
+        this.setupEventListeners();
+        this.fetchMessages();
+    }
+
+    // The Event Listeners for the ChatApp instance
+    setupEventListeners() {
+        $('#send-message').click((event) => {
+            event.preventDefault();
+            this.sendMessage();
+        });
+
+        this.socket.on('chat message', (message) => {
+            this.receiveMessage(message);
+        });
+
+        this.socket.on('user joined', (username) => {
+            this.displayUserUpdate(username);
+        });
+
+        this.socket.on('user left', (username) => {
+            this.displayUserUpdate(username);
+        });
+
+        this.signOutButton.addEventListener('click', () => {
+            this.signOut();
+        });
+    }
+
+    // The sendMessage function makes a POST request to the server with the username and message
+    sendMessage() {
+        const content = this.messageInput.val();
+        const message = `${this.username}: ${content}`;
+
         fetch('/messages', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username: username, message: content }),
+            body: JSON.stringify({ username: this.username, message: content }),
         })
             .then(response => response.json())
             .then(data => {
+                if (data.status === 'success') {
+                    this.socket.emit('chat message', message);
+                    this.messageInput.val('');
+                } else {
+                    alert(data.message);
+                }
             });
-        socket.emit('chat message', message);
-        $('#message').val('');
-    });
+    }
 
-    // Using an event listener for receiving chat messages
-    socket.on('chat message', (message) => {
-        // Extract username and message text from the received message
+    // The receiveMessage function receives a message and displays it in the chat window
+    receiveMessage(message) {
         const username = message.split(': ')[0];
         const text = message.split(': ')[1];
-        
+        const isCurrentUser = username === this.username;
 
-        // Check if the message is from the current user
-        const isCurrentUser = username === localStorage.getItem('username');
-
-        // Create a new div element for the message
         const messageElement = isCurrentUser
             ? $('<div class="message my-message"></div>')
             : $('<div class="message other-message"></div>');
 
-        // Create the message header
         const messageHeader = $(`
             <div class="message-header">
-            <span class="username">${isCurrentUser ? 'Me' : username}</span>
-            <span class="timestamp">${formatTimestamp(new Date)}</span>
+                <span class="username">${isCurrentUser ? 'Me' : username}</span>
+                <span class="timestamp">${this.formatTimestamp(new Date)}</span>
             </div>
         `);
 
-        // Create the message body
         const messageBody = $(`
             <div class="message-body">
                 <p class="text">${text}</p>
             </div>
         `);
 
-        // Append the header and body to the message element
         messageElement.append(messageHeader);
         messageElement.append(messageBody);
 
-        // Append the message element to the chat
-        $('.main-chat').append(messageElement);
+        this.mainChat.append(messageElement);
+        this.scrollToBottom();
+    }
 
-        // Scroll to the bottom of the chat
-        $('.main-chat').scrollTop($('.main-chat').prop('scrollHeight'));
-
-    });
-
-    // Handling user connection
-    socket.on('user joined', (username) => {
+    // The displayUserUpdate function displays a user update in the chat window when a user joins or leaves the chat room
+    displayUserUpdate(username) {
         const updateMsg = `<div class="update-user">${username}</div>`;
-        $('.main-chat').append(updateMsg);
-    });
+        this.mainChat.append(updateMsg);
+    }
 
-    // Handling user disconnection
-    socket.on('user left', (username) => {
-        const updateMsg = `<div class="update-user">${username}</div>`;
-        $('.main-chat').append(updateMsg);
-    });
+    // The fetchMessages function makes a GET request to the server to fetch all the messages 
+    fetchMessages() {
+        fetch('/messages')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    data.messages.forEach(message => {
+                        const username = message.username;
+                        const text = message.message;
+                        const isCurrentUser = username === this.username;
 
+                        const messageElement = isCurrentUser
+                            ? $('<div class="message my-message"></div>')
+                            : $('<div class="message other-message"></div>');
 
-});
+                        const messageHeader = $(`
+                            <div class="message-header">
+                                <span class="username">${isCurrentUser ? 'Me' : username}</span>
+                                <span class="timestamp">${this.formatTimestamp(new Date(message.timestamp))}</span>
+                            </div>
+                        `);
 
-// Fetch all messages from the database
-$(document).ready(() => {
-    fetch('/messages')
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                data.messages.forEach(message => {
-                    const username = message.username;
-                    const text = message.message;
-                    const isCurrentUser = username === localStorage.getItem('username');
-                    const messageElement = isCurrentUser
-                        ? $('<div class="message my-message"></div>')
-                        : $('<div class="message other-message"></div>');
-                    const messageHeader = $(`
-                    <div class="message-header">
-                    <span class="username">${isCurrentUser ? 'Me' : username}</span>
-                    <span class="timestamp">${formatTimestamp(new Date(message.timestamp))}</span>
-                    </div>
-                `);
-                    const messageBody = $(`
-                    <div class="message-body">
-                        <p class="text">${text}</p>
-                    </div>
-                `);
-                    messageElement.append(messageHeader);
-                    messageElement.append(messageBody);
-                    $('.main-chat').append(messageElement);
-                });
-                $('.main-chat').scrollTop($('.main-chat').prop('scrollHeight'));
+                        const messageBody = $(`
+                            <div class="message-body">
+                                <p class="text">${text}</p>
+                            </div>
+                        `);
 
-            } else {
-                alert(data.message);
-            }
+                        messageElement.append(messageHeader);
+                        messageElement.append(messageBody);
 
-        });
+                        this.mainChat.append(messageElement);
+                    });
 
-});
+                    this.scrollToBottom();
+                } else {
+                    alert(data.message);
+                }
+            });
+    }
 
-// Sign out
-document.querySelector('.sign-out').addEventListener('click', () => {
-    localStorage.removeItem('username');
-    // Get the modal and overlay elements
-    const modal = document.getElementById('customAlert');
-    const overlay = document.getElementById('overlay');
+    // The signOut function signs out the user and redirects them to the login page
+    signOut() {
+        localStorage.removeItem('username');
 
-    // Show the modal and overlay
-    modal.style.display = 'block';
-    overlay.style.display = 'block';
+        this.modal.style.display = 'block';
+        this.overlay.style.display = 'block';
+        this.modal.querySelector('p').textContent = 'You have been signed out';
 
-    // Set the modal message
-    modal.querySelector('p').textContent = 'You have been signed out';
+        setTimeout(() => {
+            this.modal.style.display = 'none';
+            this.overlay.style.display = 'none';
+            window.location.href = '/login';
+        }, 1000);
+    }
 
-    // The modal and overlay are hidden and redirect to the login page
-    setTimeout(() => {
-        modal.style.display = 'none';
-        overlay.style.display = 'none';
-        window.location.href = '/login';
-    }, 1000);
-});
+    // The formatTimestamp function formats the timestamp to the format DD.MM.YYYY HH:MM:SSAM/PM
+    formatTimestamp(date) {
+        const day = ("0" + date.getDate()).slice(-2);
+        const month = ("0" + (date.getMonth() + 1)).slice(-2);
+        const year = date.getFullYear();
 
-function formatTimestamp(date) {
-    const day = ("0" + date.getDate()).slice(-2);
-    const month = ("0" + (date.getMonth() + 1)).slice(-2);
-    const year = date.getFullYear();
+        const hours = date.getHours();
+        const minutes = ("0" + date.getMinutes()).slice(-2);
+        const seconds = ("0" + date.getSeconds()).slice(-2);
 
-    const hours = date.getHours();
-    const minutes = ("0" + date.getMinutes()).slice(-2);
-    const seconds = ("0" + date.getSeconds()).slice(-2);
+        const hourIn12HourFormat = hours % 12 || 12;
+        const amPm = hours < 12 || hours === 24 ? "AM" : "PM";
 
-    const hourIn12HourFormat = hours % 12 || 12;
-    const amPm = hours < 12 || hours === 24 ? "AM" : "PM";
+        return `${day}.${month}.${year} ${hourIn12HourFormat}.${minutes}.${seconds}${amPm}`;
+    }
 
-    return `${day}.${month}.${year} ${hourIn12HourFormat}.${minutes}.${seconds}${amPm}`;
+    // The scrollToBottom function scrolls the chat window to the bottom
+    scrollToBottom() {
+        this.mainChat.scrollTop(this.mainChat.prop('scrollHeight'));
+    }
 }
 
+// Instantiating the ChatApp class when the DOM is loaded
+$(() => {
+    new ChatApp();
+});

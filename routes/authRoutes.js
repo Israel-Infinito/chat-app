@@ -2,16 +2,22 @@ const express = require('express');
 const path = require('path');
 const authController = require('../controllers/authController');
 
-const router = express.Router();
-// route to get login page
-router.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
-});
+class AuthRoutes {
+    constructor() {
+        this.router = express.Router();
+        this.configureRoutes();
+    }
 
-router.post('/login', authController.login);
-router.get('/logout', authController.logout);
+    configureRoutes() {
+        this.router.get('/login', this.getLoginPage);
+        this.router.post('/login', authController.login);
+        this.router.get('/logout', authController.logout);
+        this.router.post('/register', authController.register);
+    }
 
-// route to post register
-router.post('/register', authController.register);
+    getLoginPage(req, res) {
+        res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
+    }
+}
 
-module.exports = router;
+module.exports = new AuthRoutes().router;
