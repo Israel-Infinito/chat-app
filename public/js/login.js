@@ -10,6 +10,7 @@ class UserAuth {
         // The event listeners for the login form and register button
         this.loginForm.addEventListener('submit', this.login.bind(this));
         this.registerBtn.addEventListener('click', this.register.bind(this));
+        this.closeButton.addEventListener('click', this.hideCustomAlert.bind(this));
     }
 
     // The login function makes a POST request to the server with the username and password
