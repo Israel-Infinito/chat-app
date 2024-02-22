@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FSE Chat Room Login</title>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+</head>
+<body class="container">
+    <!-- Login and register form container -->
+    <h1 class="title">FSE Chat Room</h1>
+    <form id="loginForm" class="form-container" method="post">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password">
+        <div class="action-button">
+            <input type="submit" value="Login">
+            <input type="button" id="registerBtn" class="register-btn" value="Register">
+        </div>
+    </form>
+    <!-- Trigger button -->
+    <!-- <button onclick="showCustomAlert()">Show Custom Alert</button> -->
+    <!-- Modal and Overlay -->
+    <div id="customAlert" class="modal">
+    <p>Registration successful! You can proceed to login</p>
+    <button id="closeButton" class="close-btn" onclick="hideCustomAlert()">Close</button>
+    </div>
+  
+    <div id="overlay" class="overlay"></div>
+    <!-- imported jQuery scripts  -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="js/login.js"></script>
+</body>
+</html>

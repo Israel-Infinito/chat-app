@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat Room</title>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+</head>
+
+<body>
+    <!-- Navigation Bar with a "Logout" button -->
+    <div>
+        <div class="header">
+            <h1>FSE CHAT ROOM</h1>
+            <button class="sign-out">Logout</button>
+        </div>
+
+        <!-- Main Chat body that contains all the messages -->
+        <div class="chat-msg main-chat">
+        </div>
+
+        <!-- Form to send a message in the chat room-->
+        <div class="message-form">
+            <textarea type="text" id="message" name="message"></textarea>
+            <div class="message-button-container">
+                <button id="send-message">Post</button>
+            </div>
+        </div>
+        <div id="customAlert" class="modal">
+            <p></p>
+        </div>
+
+        <div id="overlay" class="overlay"></div>
+    </div>
+
+    <!-- imported scripts include socket.io and jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="js/index.js"></script>
+</body>
+
+</html>
