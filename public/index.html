@@ -2,37 +2,53 @@
 <html>
 
 <head>
-    <title>Chat Room</title>
+    <title>Nexus Chat - Real-time Messaging</title>
     <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
 
 <body>
-    <!-- Navigation Bar with a "Logout" button -->
-    <div>
+    <!-- Chat Application Container -->
+    <div class="chat-container">
+        <!-- Header/Navigation Bar -->
         <div class="header">
-            <h1>FSE CHAT ROOM</h1>
+            <div class="header-content">
+                <h1>💬 Nexus Chat</h1>
+                <span class="header-subtitle">Connect & Share</span>
+            </div>
             <button class="sign-out">Logout</button>
         </div>
 
-        <!-- Main Chat body that contains all the messages -->
-        <div class="chat-msg main-chat">
-        </div>
+        <!-- Main Chat Area -->
+        <div class="chat-area">
+            <div class="chat-messages main-chat"></div>
 
-        <!-- Form to send a message in the chat room-->
-        <div class="message-form">
-            <textarea type="text" id="message" name="message"></textarea>
-            <div class="message-button-container">
-                <button id="send-message">Post</button>
+            <!-- Message Input Form -->
+            <div class="message-input-wrapper">
+                <form class="message-form">
+                    <div class="input-group">
+                        <textarea 
+                            id="message" 
+                            name="message" 
+                            placeholder="Type your message here..."
+                            rows="1"
+                        ></textarea>
+                        <button type="button" id="send-message" class="send-btn">
+                            <span>Send</span>
+                            <span class="send-icon">➤</span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
+
+        <!-- Notification Modal -->
         <div id="customAlert" class="modal">
             <p></p>
         </div>
-
         <div id="overlay" class="overlay"></div>
     </div>
 
-    <!-- imported scripts include socket.io and jQuery -->
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="js/index.js"></script>

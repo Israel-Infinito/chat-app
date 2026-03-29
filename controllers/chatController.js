@@ -5,9 +5,18 @@ class ChatController {
   // Handling the POST request to /chat endpoint
   async postMessage(req, res) {
     try {
-      const { username, message } = req.body;
-      const user = await User.findOne({ username });
-      const messageObj = { userid: user._id, username, message };
+      const { message } = req.body;
+      
+      // Use authenticated user from Passport session
+      if (!req.user) {
+        return res.status(401).json({ status: 'error', message: 'User not authenticated' });
+      }
+
+      const messageObj = { 
+        userid: req.user._id, 
+        username: req.user.username, 
+        message 
+      };
       const savedMessage = await Message.create(messageObj);
       res.status(201).json({savedMessage, status: 'success'});
     } catch (error) {

@@ -8,7 +8,7 @@ class ChatApp {
             }
         });
         this.messageInput = $('#message');
-        this.mainChat = $('.main-chat');
+        this.mainChat = $('.chat-messages');
         this.signOutButton = document.querySelector('.sign-out');
         this.modal = document.getElementById('customAlert');
         this.overlay = document.getElementById('overlay');
@@ -24,9 +24,23 @@ class ChatApp {
 
     // The Event Listeners for the ChatApp instance
     setupEventListeners() {
+        // Send message on button click
         $('#send-message').click((event) => {
             event.preventDefault();
             this.sendMessage();
+        });
+
+        // Send message on Enter key (without Shift)
+        this.messageInput.keydown((event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                this.sendMessage();
+            }
+        });
+
+        // Auto-resize textarea
+        this.messageInput.on('input', () => {
+            this.autoResizeTextarea();
         });
 
         this.socket.on('chat message', (message) => {
@@ -46,9 +60,22 @@ class ChatApp {
         });
     }
 
-    // The sendMessage function makes a POST request to the server with the username and message
+    // Auto-resize textarea based on content
+    autoResizeTextarea() {
+        this.messageInput[0].style.height = 'auto';
+        const scrollHeight = this.messageInput[0].scrollHeight;
+        const maxHeight = 100;
+        this.messageInput[0].style.height = Math.min(scrollHeight, maxHeight) + 'px';
+    }
+
+    // The sendMessage function makes a POST request to the server with the message
     sendMessage() {
-        const content = this.messageInput.val();
+        const content = this.messageInput.val().trim();
+        
+        if (!content) {
+            return;
+        }
+
         const message = `${this.username}: ${content}`;
 
         fetch('/messages', {
@@ -56,23 +83,28 @@ class ChatApp {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ username: this.username, message: content }),
+            body: JSON.stringify({ message: content }),
         })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
                     this.socket.emit('chat message', message);
                     this.messageInput.val('');
+                    this.messageInput[0].style.height = 'auto';
                 } else {
-                    alert(data.message);
+                    this.showNotification('Error: ' + data.message);
                 }
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                this.showNotification('Failed to send message');
             });
     }
 
     // The receiveMessage function receives a message and displays it in the chat window
     receiveMessage(message) {
         const username = message.split(': ')[0];
-        const text = message.split(': ')[1];
+        const text = message.split(': ').slice(1).join(': ');
         const isCurrentUser = username === this.username;
 
         const messageElement = isCurrentUser
@@ -81,14 +113,14 @@ class ChatApp {
 
         const messageHeader = $(`
             <div class="message-header">
-                <span class="username">${isCurrentUser ? 'Me' : username}</span>
-                <span class="timestamp">${this.formatTimestamp(new Date)}</span>
+                <span class="username">${isCurrentUser ? 'You' : username}</span>
+                <span class="timestamp">${this.formatTimestamp(new Date())}</span>
             </div>
         `);
 
         const messageBody = $(`
             <div class="message-body">
-                <p class="text">${text}</p>
+                <p class="text">${this.escapeHtml(text)}</p>
             </div>
         `);
 
@@ -101,8 +133,9 @@ class ChatApp {
 
     // The displayUserUpdate function displays a user update in the chat window when a user joins or leaves the chat room
     displayUserUpdate(username) {
-        const updateMsg = `<div class="update-user">${username}</div>`;
+        const updateMsg = `<div class="update-user">👋 ${username}</div>`;
         this.mainChat.append(updateMsg);
+        this.scrollToBottom();
     }
 
     // The fetchMessages function makes a GET request to the server to fetch all the messages 
@@ -122,14 +155,14 @@ class ChatApp {
 
                         const messageHeader = $(`
                             <div class="message-header">
-                                <span class="username">${isCurrentUser ? 'Me' : username}</span>
+                                <span class="username">${isCurrentUser ? 'You' : username}</span>
                                 <span class="timestamp">${this.formatTimestamp(new Date(message.timestamp))}</span>
                             </div>
                         `);
 
                         const messageBody = $(`
                             <div class="message-body">
-                                <p class="text">${text}</p>
+                                <p class="text">${this.escapeHtml(text)}</p>
                             </div>
                         `);
 
@@ -141,45 +174,64 @@ class ChatApp {
 
                     this.scrollToBottom();
                 } else {
-                    alert(data.message);
+                    console.error('Failed to fetch messages:', data.message);
                 }
+            })
+            .catch(error => {
+                console.error('Error fetching messages:', error);
             });
     }
 
     // The signOut function signs out the user and redirects them to the login page
     signOut() {
         localStorage.removeItem('username');
+        this.showNotification('You have been signed out');
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 800);
+    }
 
+    // Show notification in modal
+    showNotification(message) {
         this.modal.style.display = 'block';
         this.overlay.style.display = 'block';
-        this.modal.querySelector('p').textContent = 'You have been signed out';
+        this.modal.querySelector('p').textContent = message;
 
         setTimeout(() => {
             this.modal.style.display = 'none';
             this.overlay.style.display = 'none';
-            window.location.href = '/login';
-        }, 1000);
+        }, 2500);
     }
 
-    // The formatTimestamp function formats the timestamp to the format DD.MM.YYYY HH:MM:SSAM/PM
+    // The formatTimestamp function formats the timestamp
     formatTimestamp(date) {
-        const day = ("0" + date.getDate()).slice(-2);
-        const month = ("0" + (date.getMonth() + 1)).slice(-2);
-        const year = date.getFullYear();
+        const now = new Date();
+        const isToday = date.toDateString() === now.toDateString();
+        
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        if (isToday) {
+            return `${hours}:${minutes}`;
+        } else {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            return `${day}/${month} ${hours}:${minutes}`;
+        }
+    }
 
-        const hours = date.getHours();
-        const minutes = ("0" + date.getMinutes()).slice(-2);
-        const seconds = ("0" + date.getSeconds()).slice(-2);
-
-        const hourIn12HourFormat = hours % 12 || 12;
-        const amPm = hours < 12 || hours === 24 ? "AM" : "PM";
-
-        return `${day}.${month}.${year} ${hourIn12HourFormat}.${minutes}.${seconds}${amPm}`;
+    // Escape HTML to prevent XSS
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     // The scrollToBottom function scrolls the chat window to the bottom
     scrollToBottom() {
-        this.mainChat.scrollTop(this.mainChat.prop('scrollHeight'));
+        setTimeout(() => {
+            this.mainChat.scrollTop(this.mainChat.prop('scrollHeight'));
+        }, 0);
     }
 }
 
