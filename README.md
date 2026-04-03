@@ -1,4 +1,4 @@
-# FSE Chat Room Application
+# Nexus Chat Room Application
 
 A real-time chat application built with Node.js, Express, and Socket.IO that allows users to register, log in, and participate in a shared chat room.
 
